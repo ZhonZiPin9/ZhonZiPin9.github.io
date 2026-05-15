@@ -218,6 +218,7 @@
             z-index: 9999;
             display: none;
             min-width: 280px;
+            max-width: 90%;
             color: #fff;
         }
         .verify-modal {
@@ -504,7 +505,7 @@
         let ok = await checkVerify();
         if (!ok) return;
         let txt = input.value.trim();
-        if (!txt) { toast("请输入想说的话"); return; }
+        if (!txt) { toast("你 有想对星星说的话吗"); return; }
         let date = new Date().toLocaleString('zh-CN', {
             year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'
         });
@@ -547,10 +548,26 @@
     input.addEventListener('keydown', function(e){
         if(e.key === 'Enter') add();
     });
-    window.onclick = e => {
+
+    // ✅ 修复手机端点击空白处无法关闭弹窗的问题
+    // 同时支持点击事件和触摸事件
+    function closeModalOnClick(e) {
         if(e.target === modal) modal.style.display = 'none';
         if(e.target === verifyModal) verifyModal.style.display = 'none';
-    };
+    }
+
+    // 同时监听点击和触摸事件
+    window.addEventListener('click', closeModalOnClick);
+    window.addEventListener('touchstart', closeModalOnClick);
+
+    // 给弹窗本身也添加点击关闭事件（双重保险）
+    modal.addEventListener('click', function(e) {
+        if(e.target === this) this.style.display = 'none';
+    });
+    verifyModal.addEventListener('click', function(e) {
+        if(e.target === this) this.style.display = 'none';
+    });
+
     window.onload = function(){
         loadFromCloud();
         input.focus();
