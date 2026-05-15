@@ -17,6 +17,7 @@
             color: #fff;
             overflow: hidden;
         }
+        /* 最底层背景，绝对不会被盖住 */
         .bg {
             position: fixed;
             left: 0;
@@ -28,19 +29,23 @@
             background-position: center;
             background-repeat: no-repeat;
         }
+        /* 电脑横版背景（用仓库里的图片） */
         @media (min-width: 768px) {
             .bg {
                 background-image: url("./bg-landscape.jpg");
             }
         }
+        /* 手机竖版背景（用仓库里的图片） */
         @media (max-width: 767px) {
             .bg {
                 background-image: url("./bg-portrait.jpg");
             }
         }
+        /* 纯黑兜底，防止图片加载失败 */
         body {
             background: #000;
         }
+        /* 想念值计数器（已改格式+闪烁动画+点击控制音乐） */
         .star-counter {
             position: fixed;
             top: 22px;
@@ -51,9 +56,12 @@
             border-radius: 30px;
             font-size: 14px;
             z-index: 9999;
-            pointer-events: none;
+            pointer-events: auto; /* 改为可点击，控制音乐 */
+            cursor: pointer;
+            transition: all 0.3s ease;
             animation: counterTwinkle 3s ease-in-out infinite;
         }
+        /* 计数器闪烁动画（和星星同步） */
         @keyframes counterTwinkle {
             0%,100% { opacity: 0.7; }
             50% { opacity: 1; }
@@ -85,6 +93,7 @@
         }
         #galaxyView {
             display: none;
+            background: transparent;
             z-index: 10;
         }
         .star {
@@ -94,6 +103,7 @@
             pointer-events: auto;
             cursor: pointer;
             animation: twinkle ease-in-out infinite;
+            transition: all 0.3s ease;
         }
         @keyframes twinkle {
             0%,100% { opacity: var(--o1); }
@@ -113,6 +123,7 @@
             animation: galaxyRotate 22s linear infinite;
             z-index: 2;
             filter: blur(1.2px);
+            transition: all 0.5s ease;
         }
         @keyframes galaxyRotate {
             0% { transform: rotate(0deg) scale(1); }
@@ -245,7 +256,13 @@
     </style>
 </head>
 <body>
+    <!-- 最底层背景层 -->
     <div class="bg"></div>
+    
+    <!-- 背景音乐（进入页面立即播放，无限循环） -->
+    <audio id="bgm" src="./bgm.mp3" loop preload="auto" volume="0.3" muted>
+    
+    <!-- 想念值计数器（已改格式+闪烁动画+点击控制音乐） -->
     <div class="star-counter" id="starCounter">✨0</div>
 
     <div id="mainView"></div>
@@ -276,6 +293,7 @@
     const verifyModal = document.getElementById('verifyModal');
     const verifyInput = document.getElementById('verifyInput');
     const starCounter = document.getElementById('starCounter');
+    const bgm = document.getElementById('bgm'); // 背景音乐元素
     let isVerified = false;
     let selectedImage = ''; // 存储选中的图片
 
@@ -284,10 +302,21 @@
     const API_KEY = "$2a$10$qB80mS9R8wjPkeiFI4l5SujXGYJyzUKpYOfH9kDM1FPBf8L9EnJVy";
     let groups = [];
 
-    // 更新想念值
+    // ✅ 点击想念值暂停/继续音乐（无提示）
+    starCounter.addEventListener('click', () => {
+        if(bgm.paused) {
+            bgm.play();
+        } else {
+            bgm.pause();
+        }
+    });
+
+    // 更新想念值计数器（已改格式+保留数字滚动动画）
     function updateStarCount() {
         let total = 0;
         groups.forEach(g => total += g.items.length);
+        
+        // 数字滚动动画
         let current = parseInt(starCounter.textContent.match(/\d+/)[0]) || 0;
         let step = Math.ceil((total - current) / 20);
         let timer = setInterval(() => {
@@ -300,7 +329,7 @@
         }, 30);
     }
 
-    // 彗星动画
+    // 彗星
     function createComet() {
         let c = document.createElement('div');
         c.className = 'comet';
@@ -360,7 +389,7 @@
         return { size: baseSize, color: `rgb(${r},${g},${b})` };
     }
 
-    // 验证口令
+    // 统一验证：查看 + 发送都要口令
     async function checkVerify() {
         return new Promise(resolve => {
             if (isVerified) return resolve(true);
@@ -384,7 +413,6 @@
         })
     }
 
-    // 渲染主界面
     function renderMain() {
         main.innerHTML = '';
         groups.forEach((g, idx) => {
@@ -425,6 +453,7 @@
                 s.style.setProperty('--o1', (Math.random() * 0.3 + 0.2).toFixed(2));
                 s.style.setProperty('--o2', (Math.random() * 0.5 + 0.6).toFixed(2));
 
+                // 查看必须验证
                 s.onclick = async (e) => {
                     e.stopPropagation();
                     let ok = await checkVerify();
@@ -443,7 +472,6 @@
         }
     }
 
-    // 打开星系
     function openGalaxy(idx) {
         let g = groups[idx];
         galaxyView.innerHTML = `
@@ -462,6 +490,7 @@
             s.style.width = size + 'px';
             s.style.height = size + 'px';
 
+            // 查看必须验证
             s.onclick = async (e) => {
                 e.stopPropagation();
                 let ok = await checkVerify();
@@ -478,7 +507,7 @@
         });
     }
 
-    // 加载数据
+    // 加载云端
     async function loadFromCloud() {
         try {
             let res = await fetch(API_URL, { headers: { "X-Master-Key": API_KEY } });
@@ -493,7 +522,7 @@
         }
     }
 
-    // 保存数据
+    // 保存云端
     async function saveToCloud() {
         try {
             await fetch(API_URL, {
@@ -507,26 +536,7 @@
         } catch (e) {}
     }
 
-    // ✅ 【核心】真正的图片上传功能
-    plusBtn.onclick = () => {
-        let inp = document.createElement('input');
-        inp.type = 'file';
-        inp.accept = 'image/*';
-        inp.onchange = (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                selectedImage = ev.target.result; // 保存图片
-                input.value = "[图片] " + input.value;
-                toast("图片即将发射星海");
-            };
-            reader.readAsDataURL(file);
-        };
-        inp.click();
-    };
-
-    // 发送内容（文字+图片）
+    // 发送
     async function add() {
         let ok = await checkVerify();
         if (!ok) return;
@@ -537,6 +547,7 @@
             year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'
         });
         const tx = Math.random()*90+5;
+        // 限制星星只出现在页面上65%的区域，不会跑到输入框上
         const ty = Math.random()*65+10;
         
         // 存储文字+图片
@@ -557,6 +568,7 @@
             last.items.push(item);
         } else {
             const gx = Math.random()*85+7;
+            // 星系也限制在上方区域
             const gy = Math.random()*60+10;
             flyToTarget(gx, gy);
             groups.push({
@@ -572,6 +584,25 @@
         toast("✨ 想念已存入星海");
         input.value = '';
     }
+
+    // ✅ 【核心】真正的图片上传功能
+    plusBtn.onclick = () => {
+        let inp = document.createElement('input');
+        inp.type = 'file';
+        inp.accept = 'image/*';
+        inp.onchange = (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                selectedImage = ev.target.result; // 保存图片
+                input.value = "[图片] " + input.value;
+                toast("图片即将发射星海");
+            };
+            reader.readAsDataURL(file);
+        };
+        inp.click();
+    };
 
     sendBtn.addEventListener('click', add);
     input.addEventListener('keydown', function(e){
@@ -601,6 +632,23 @@
     window.onload = function(){
         loadFromCloud();
         input.focus();
+        
+        // ✅ 进入页面立即播放音乐（兼容所有浏览器）
+        // 先静音播放绕过浏览器限制
+        bgm.muted = true;
+        bgm.play().then(() => {
+            // 播放成功后立即取消静音
+            setTimeout(() => {
+                bgm.muted = false;
+            }, 100);
+        }).catch(() => {
+            // 如果自动播放失败，用户第一次点击页面时自动播放
+            document.body.addEventListener('click', function playBgm() {
+                bgm.muted = false;
+                bgm.play();
+                document.body.removeEventListener('click', playBgm);
+            }, { once: true });
+        });
     };
 </script>
 </body>
