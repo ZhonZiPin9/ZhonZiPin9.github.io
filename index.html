@@ -262,7 +262,7 @@
     </div>
 
 <!-- 背景音乐 -->
-<audio id="bgm" loop preload="auto" src="bgm.mp3">
+<audio id="bgm" loop preload="auto" src="bgm.mp3"></audio>
 
 <script>
     const GROUP_SIZE = 365;
@@ -278,24 +278,31 @@
     const verifyInput = document.getElementById('verifyInput');
     const starCounter = document.getElementById('starCounter');
     const bgm = document.getElementById('bgm');
+    
+    let isMusicPlayed = false; // 音乐只自动播放一次
     let isVerified = false;
     let selectedImage = '';
     const API_URL = "https://api.jsonbin.io/v3/b/6a06d65bc0954111d8280264";
     const API_KEY = "$2a$10$qB80mS9R8wjPkeiFI4l5SujXGYJyzUKpYOfH9kDM1FPBf8L9EnJVy";
     let groups = [];
 
-    // 自动播放音乐（兼容手机/电脑）
-    function autoPlayMusic() {
-        const play = () => {
-            bgm.play().catch(err => {});
-            document.removeEventListener('click', play);
-            document.removeEventListener('touchstart', play);
-        };
-        document.addEventListener('click', play);
-        document.addEventListener('touchstart', play);
+    // 任意操作自动播放音乐（电脑+手机全兼容）
+    function triggerAutoPlay() {
+        if (isMusicPlayed) return;
+        bgm.play().catch(() => {});
+        isMusicPlayed = true;
+        // 播放后移除所有监听
+        document.removeEventListener('click', triggerAutoPlay);
+        document.removeEventListener('touchstart', triggerAutoPlay);
+        document.removeEventListener('keydown', triggerAutoPlay);
     }
 
-    // 右上角点击切换播放/暂停
+    // 监听任意用户操作
+    document.addEventListener('click', triggerAutoPlay);
+    document.addEventListener('touchstart', triggerAutoPlay);
+    document.addEventListener('keydown', triggerAutoPlay);
+
+    // 右上角点击：播放/暂停
     starCounter.onclick = () => {
         if (bgm.paused) {
             bgm.play();
@@ -605,7 +612,6 @@
 
     window.onload = function(){
         loadFromCloud();
-        autoPlayMusic();
         input.focus();
     };
 </script>
