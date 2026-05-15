@@ -19,19 +19,23 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            background-attachment: fixed;
         }
+
         /* 电脑横版背景 */
-        @media (min-aspect-ratio: 1/1) {
+        @media screen and (min-width: 768px) {
             body {
-                background-image: url("https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9r32ns0r0/zhonzixin9-bg-landscape.png");
+                background-image: url("https://p.qqan.com/up/2021-4/16175167066933106.jpg");
             }
         }
+
         /* 手机竖版背景 */
-        @media (max-aspect-ratio: 1/1) {
+        @media screen and (max-width: 767px) {
             body {
-                background-image: url("https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9r32ns0r0/zhonzixin9-bg-portrait.png");
+                background-image: url("https://p.qqan.com/up/2021-4/16175167077238746.jpg");
             }
         }
+
         .comet {
             position: fixed;
             width: 2px;
