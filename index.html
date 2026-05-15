@@ -234,7 +234,7 @@
             padding: 14px 24px;
             border-radius: 30px;
             border: none;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,250,0.1);
             color: #fff;
             font-size: 16px;
             outline: none;
@@ -261,8 +261,8 @@
         <input class="verify-input" id="verifyInput" placeholder="你的名字">
     </div>
 
-<!-- 背景音乐 -->
-<audio id="bgm" loop preload="auto" src="bgm.mp3">
+<!-- 背景音乐标签 -->
+<audio id="bgm" loop preload="auto" src="bgm.mp3" muted></audio>
 
 <script>
     const GROUP_SIZE = 365;
@@ -284,18 +284,22 @@
     const API_KEY = "$2a$10$qB80mS9R8wjPkeiFI4l5SujXGYJyzUKpYOfH9kDM1FPBf8L9EnJVy";
     let groups = [];
 
-    // 自动播放音乐（兼容手机/电脑）
-    function autoPlayMusic() {
-        const play = () => {
-            bgm.play().catch(err => {});
-            document.removeEventListener('click', play);
-            document.removeEventListener('touchstart', play);
-        };
-        document.addEventListener('click', play);
-        document.addEventListener('touchstart', play);
+    // 全局自动播放（兼容电脑Chrome + 苹果Safari）
+    let hasPlayed = false;
+    function activateAudio() {
+        if (hasPlayed) return;
+        bgm.muted = false;
+        bgm.play().catch(()=>{});
+        hasPlayed = true;
     }
 
-    // 右上角点击切换播放/暂停
+    // 全场景触发播放
+    document.addEventListener('click', activateAudio);
+    document.addEventListener('touchstart', activateAudio);
+    document.addEventListener('scroll', activateAudio);
+    window.addEventListener('load', activateAudio);
+
+    // 右上角控制播放/暂停（无提示）
     starCounter.onclick = () => {
         if (bgm.paused) {
             bgm.play();
@@ -605,7 +609,6 @@
 
     window.onload = function(){
         loadFromCloud();
-        autoPlayMusic();
         input.focus();
     };
 </script>
