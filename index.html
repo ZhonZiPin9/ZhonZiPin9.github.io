@@ -45,6 +45,26 @@
         body {
             background: #000;
         }
+        /* 想念值计数器（已改格式+闪烁动画） */
+        .star-counter {
+            position: fixed;
+            top: 22px;
+            right: 22px;
+            padding: 9px 18px;
+            background: rgba(255,255,255,0.13);
+            backdrop-filter: blur(12px);
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 9999;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            animation: counterTwinkle 3s ease-in-out infinite;
+        }
+        /* 计数器闪烁动画（和星星同步） */
+        @keyframes counterTwinkle {
+            0%,100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
         .comet {
             position: fixed;
             width: 2px;
@@ -226,6 +246,9 @@
 <body>
     <!-- 最底层背景层 -->
     <div class="bg"></div>
+    
+    <!-- 想念值计数器（已改格式+闪烁动画） -->
+    <div class="star-counter" id="starCounter">✨0</div>
 
     <div id="mainView"></div>
     <div id="galaxyView"></div>
@@ -254,12 +277,31 @@
     const modalContent = document.getElementById('modalContent');
     const verifyModal = document.getElementById('verifyModal');
     const verifyInput = document.getElementById('verifyInput');
+    const starCounter = document.getElementById('starCounter');
     let isVerified = false;
 
     // 云端配置
     const API_URL = "https://api.jsonbin.io/v3/b/666a1f3cad19ca66187d5c09";
     const API_KEY = "$2b$10$QJz8t2G8H0K7t1G1g0K0uO";
     let groups = [];
+
+    // 更新想念值计数器（已改格式+保留数字滚动动画）
+    function updateStarCount() {
+        let total = 0;
+        groups.forEach(g => total += g.items.length);
+        
+        // 数字滚动动画
+        let current = parseInt(starCounter.textContent.match(/\d+/)[0]) || 0;
+        let step = Math.ceil((total - current) / 20);
+        let timer = setInterval(() => {
+            current += step;
+            if (current >= total) {
+                current = total;
+                clearInterval(timer);
+            }
+            starCounter.textContent = `✨${current}`;
+        }, 30);
+    }
 
     // 彗星
     function createComet() {
@@ -334,10 +376,10 @@
                     if(val === "陈"){
                         isVerified = true;
                         verifyModal.style.display = "none";
-                        toast("验证成功");
+                        toast("你 来了");
                         resolve(true);
                     } else {
-                        toast("口令不正确");
+                        toast("你 不是她");
                         resolve(false);
                     }
                 }
@@ -435,9 +477,11 @@
             let data = await res.json();
             groups = data.record || [{items:[], x:50, y:50}];
             renderMain();
+            updateStarCount(); // 加载完成后更新想念值
         } catch (e) {
             groups = [{items:[], x:50, y:50}];
             renderMain();
+            updateStarCount();
         }
     }
 
@@ -465,7 +509,8 @@
             year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'
         });
         const tx = Math.random()*90+5;
-        const ty = Math.random()*80+10;
+        // 限制星星只出现在页面上65%的区域，不会跑到输入框上
+        const ty = Math.random()*65+10;
         let item = { content:txt, date, x:tx, y:ty };
         if (groups.length === 0) groups.push({items:[], x:50, y:50});
         let last = groups[groups.length - 1];
@@ -474,7 +519,8 @@
             last.items.push(item);
         } else {
             const gx = Math.random()*85+7;
-            const gy = Math.random()*75+12;
+            // 星系也限制在上方区域
+            const gy = Math.random()*60+10;
             flyToTarget(gx, gy);
             groups.push({
                 items: [item],
@@ -485,6 +531,7 @@
         }
         await saveToCloud();
         renderMain();
+        updateStarCount(); // 发送新想念后更新计数
         toast("✨ 想念已存入星海");
         input.value = '';
     }
