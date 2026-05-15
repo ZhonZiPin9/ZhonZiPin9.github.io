@@ -10,16 +10,28 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
             background: #000;
             color: #fff;
             min-height: 100vh;
             overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
-
-        /* 紫色彗星 */
+        /* 电脑横版背景 */
+        @media (min-aspect-ratio: 1/1) {
+            body {
+                background-image: url("https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9r32ns0r0/zhonzixin9-bg-landscape.png");
+            }
+        }
+        /* 手机竖版背景 */
+        @media (max-aspect-ratio: 1/1) {
+            body {
+                background-image: url("https://p3-flow-image-sign.byteimg.com/tos-cn-i-a9r32ns0r0/zhonzixin9-bg-portrait.png");
+            }
+        }
         .comet {
             position: fixed;
             width: 2px;
@@ -40,7 +52,6 @@
             right: 0;
             top: 0;
         }
-
         #mainView, #galaxyView {
             position: fixed;
             inset: 0;
@@ -51,8 +62,6 @@
             background: #000;
             z-index: 10;
         }
-
-        /* 普通星星 */
         .star {
             position: absolute;
             background: #fff;
@@ -66,15 +75,12 @@
             0%,100% { opacity: var(--o1); }
             50% { opacity: var(--o2); }
         }
-
-        /* 最后一颗星星：紫色 最亮 最大 */
         .star.last-purple {
             background: #a855f7 !important;
             box-shadow: 0 0 20px #a855f7, 0 0 40px rgba(168,85,247,1) !important;
             transform: scale(1.8);
             z-index: 6;
         }
-
         .galaxy {
             position: absolute;
             border-radius: 50%;
@@ -90,8 +96,6 @@
             50% { transform: rotate(180deg) scale(1.08); }
             100% { transform: rotate(360deg) scale(1); }
         }
-
-        /* 新星系高亮闪烁特效 */
         .galaxy.new-burst {
             animation: galaxyBurst 1.2s ease-out;
         }
@@ -100,8 +104,6 @@
             60% { transform: scale(1.3); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
-
-        /* 飞入五角星（星星 & 星系共用） */
         .flying-star {
             position: fixed;
             z-index: 99999;
@@ -113,7 +115,6 @@
             clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
             box-shadow: 0 0 20px #a855f7, 0 0 40px rgba(168,85,247,1);
         }
-
         .input-area {
             position: fixed;
             bottom: 8%;
@@ -159,7 +160,6 @@
             font-size: 14px;
             cursor: pointer;
         }
-
         .toast {
             position: fixed;
             top: 22%;
@@ -174,7 +174,6 @@
             color: #fff;
             text-align: center;
         }
-
         .modal {
             position: fixed;
             top: 50%;
@@ -193,7 +192,7 @@
             top: 0; left: 0;
             width: 100%; height: 100%;
             background: rgba(0,0,0,0.85);
-            z-index: 999999;
+            z-index: 9999999;
             display: none;
             align-items: center;
             justify-content: center;
@@ -211,17 +210,14 @@
         }
     </style>
 </head>
-
 <body>
     <div id="mainView"></div>
     <div id="galaxyView"></div>
-
     <div class="input-area">
         <input type="text" class="input-box" id="input" placeholder="给想念一处寄存的星海。">
         <button class="plus-btn" id="plusBtn">+</button>
         <button class="send-btn" id="sendBtn">星海会替你记得</button>
     </div>
-
     <div class="modal" id="modal">
         <div id="modalDate" style="font-size:12px;color:#aaa;margin-bottom:10px"></div>
         <div id="modalContent"></div>
@@ -242,11 +238,14 @@
     const modalContent = document.getElementById('modalContent');
     const verifyModal = document.getElementById('verifyModal');
     const verifyInput = document.getElementById('verifyInput');
-
-    let groups = JSON.parse(localStorage.getItem('groups') || '[]');
     let isVerified = false;
 
-    // 紫色彗星 正常生成
+    // 云端配置
+    const API_URL = "https://api.jsonbin.io/v3/b/666a1f3cad19ca66187d5c09";
+    const API_KEY = "$2b$10$QJz8t2G8H0K7t1G1g0K0uO";
+    let groups = [];
+
+    // 彗星
     function createComet() {
         let c = document.createElement('div');
         c.className = 'comet';
@@ -255,7 +254,6 @@
         c.style.left = startX + 'px';
         c.style.top = startY + 'px';
         document.body.appendChild(c);
-        
         setTimeout(() => {
             c.style.transition = 'all 3.2s linear';
             c.style.opacity = '1';
@@ -266,7 +264,6 @@
     }
     setInterval(createComet, 4500);
 
-    // 返回按钮 100% 正常
     window.goBack = function() {
         galaxyView.style.display = 'none';
     }
@@ -279,7 +276,6 @@
         setTimeout(()=>t.remove(), 2000);
     }
 
-    // 飞入五角星动画（星星 & 星系通用）
     function flyToTarget(targetX, targetY) {
         let star = document.createElement('div');
         star.className = 'flying-star';
@@ -297,7 +293,6 @@
         setTimeout(() => star.remove(), 2600);
     }
 
-    // 根据字数获取星星样式：越长越红、越大
     function getStarStyle(len) {
         let baseSize = 1.0;
         let r = 255, g = 255, b = 255;
@@ -310,122 +305,8 @@
         return { size: baseSize, color: `rgb(${r},${g},${b})` };
     }
 
-    // 渲染主页面
-    function renderMain() {
-        main.innerHTML = '';
-
-        // 渲染星系
-        groups.forEach((g, idx) => {
-            if (g.items.length === GROUP_SIZE) {
-                let gal = document.createElement('div');
-                gal.className = 'galaxy';
-                
-                // 新星系高亮特效
-                if (g.isNew) {
-                    gal.classList.add('new-burst');
-                    delete g.isNew;
-                }
-                
-                const size = 60 + Math.random() * 25;
-                const r = Math.floor(Math.random() * 120) + 80;
-                const g1 = Math.floor(Math.random() * 100) + 100;
-                const b = 255;
-                const a1 = (0.18 + Math.random() * 0.12).toFixed(2);
-                const a2 = (0.14 + Math.random() * 0.10).toFixed(2);
-                const a3 = (0.10 + Math.random() * 0.08).toFixed(2);
-                
-                gal.style.width = size + 'px';
-                gal.style.height = size + 'px';
-                gal.style.left = (g.x || 50) + '%';
-                gal.style.top = (g.y || 50) + '%';
-                gal.style.background = `
-                    radial-gradient(circle, rgba(${r},${g1},${b},${a1}) 0%, transparent 40%),
-                    radial-gradient(circle, rgba(${r-30},${g1-30},${b},${a2}) 0%, transparent 60%),
-                    radial-gradient(circle, rgba(${r-60},${g1-60},${b},${a3}) 0%, transparent 80%)
-                `;
-                gal.onclick = () => openGalaxy(idx);
-                main.appendChild(gal);
-            }
-        });
-
-        // 渲染当前组星星 → 最后一颗紫色
-        if (groups.length === 0) return;
-        const last = groups[groups.length - 1];
-        if (last.items.length < GROUP_SIZE) {
-            last.items.forEach((it, i, arr) => {
-                let s = document.createElement('div');
-                s.className = 'star';
-                
-                let len = it.content.length;
-                let style = getStarStyle(len);
-                s.style.background = style.color;
-
-                if (i === arr.length - 1) {
-                    s.classList.add('last-purple');
-                }
-
-                s.style.left = it.x + '%';
-                s.style.top = it.y + '%';
-                let size = (Math.random() * 2.5 + 1).toFixed(1) * style.size;
-                s.style.width = size + 'px';
-                s.style.height = size + 'px';
-                s.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                s.style.setProperty('--o1', (Math.random() * 0.3 + 0.2).toFixed(2));
-                s.style.setProperty('--o2', (Math.random() * 0.5 + 0.6).toFixed(2));
-                s.onclick = () => {
-                    modalDate.textContent = it.date;
-                    modalContent.textContent = it.content;
-                    modal.style.display = 'block';
-                };
-                main.appendChild(s);
-            });
-        }
-    }
-
-    // 打开星系 + 禁止空白点击
-    function openGalaxy(idx) {
-        let g = groups[idx];
-        galaxyView.innerHTML = `
-            <button onclick="goBack()" style="
-                position: fixed; top:22px; left:22px; padding:9px 18px;
-                background:rgba(255,255,255,0.22); backdrop-filter:blur(10px);
-                border:none; border-radius:30px; color:#fff; font-size:14px; cursor:pointer; pointer-events:auto; z-index:9999;">
-                ← 返回星海
-            </button>
-        `;
-        galaxyView.style.display = 'block';
-
-        g.items.forEach((it, i, arr) => {
-            let s = document.createElement('div');
-            s.className = 'star';
-            
-            let len = it.content.length;
-            let style = getStarStyle(len);
-            s.style.background = style.color;
-
-            if (i === arr.length - 1) {
-                s.classList.add('last-purple');
-            }
-
-            s.style.left = it.x + '%';
-            s.style.top = it.y + '%';
-            let size = (Math.random() * 2.2 + 1).toFixed(1) * style.size;
-            s.style.width = size + 'px';
-            s.style.height = size + 'px';
-            s.style.animationDuration = (Math.random() * 2.5 + 2) + 's';
-            s.style.setProperty('--o1', '0.3');
-            s.style.setProperty('--o2', '0.9');
-            s.onclick = () => {
-                modalDate.textContent = it.date;
-                modalContent.textContent = it.content;
-                modal.style.display = 'block';
-            };
-            galaxyView.appendChild(s);
-        });
-    }
-
-    // 验证
-    function checkVerify() {
+    // 统一验证：查看 + 发送都要口令
+    async function checkVerify() {
         return new Promise(resolve => {
             if (isVerified) return resolve(true);
             verifyModal.style.display = "flex";
@@ -437,10 +318,10 @@
                     if(val === "陈"){
                         isVerified = true;
                         verifyModal.style.display = "none";
-                        toast("你 来了");
+                        toast("验证成功");
                         resolve(true);
                     } else {
-                        toast("你 不是她");
+                        toast("口令不正确");
                         resolve(false);
                     }
                 }
@@ -448,13 +329,120 @@
         })
     }
 
+    function renderMain() {
+        main.innerHTML = '';
+        groups.forEach((g, idx) => {
+            if (g.items.length === GROUP_SIZE) {
+                let gal = document.createElement('div');
+                gal.className = 'galaxy';
+                if (g.isNew) { gal.classList.add('new-burst'); delete g.isNew; }
+                const size = 60 + Math.random() * 25;
+                const r = Math.floor(Math.random() * 120) + 80;
+                const g1 = Math.floor(Math.random() * 100) + 100;
+                gal.style.width = size + 'px';
+                gal.style.height = size + 'px';
+                gal.style.left = (g.x || 50) + '%';
+                gal.style.top = (g.y || 50) + '%';
+                gal.style.background = `
+                    radial-gradient(circle, rgba(${r},${g1},255,0.18) 0%, transparent 40%),
+                    radial-gradient(circle, rgba(${r-30},${g1-30},255,0.14) 0%, transparent 60%)
+                `;
+                gal.onclick = () => openGalaxy(idx);
+                main.appendChild(gal);
+            }
+        });
+        if (groups.length === 0) return;
+        const last = groups[groups.length - 1];
+        if (last.items.length < GROUP_SIZE) {
+            last.items.forEach((it, i, arr) => {
+                let s = document.createElement('div');
+                s.className = 'star';
+                let style = getStarStyle(it.content.length);
+                s.style.background = style.color;
+                if (i === arr.length - 1) s.classList.add('last-purple');
+                s.style.left = it.x + '%';
+                s.style.top = it.y + '%';
+                let size = (Math.random() * 2.5 + 1).toFixed(1) * style.size;
+                s.style.width = size + 'px';
+                s.style.height = size + 'px';
+                s.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                s.style.setProperty('--o1', (Math.random() * 0.3 + 0.2).toFixed(2));
+                s.style.setProperty('--o2', (Math.random() * 0.5 + 0.6).toFixed(2));
+
+                // 查看必须验证
+                s.onclick = async () => {
+                    let ok = await checkVerify();
+                    if(!ok) return;
+                    modalDate.textContent = it.date;
+                    modalContent.textContent = it.content;
+                    modal.style.display = 'block';
+                };
+                main.appendChild(s);
+            });
+        }
+    }
+
+    function openGalaxy(idx) {
+        let g = groups[idx];
+        galaxyView.innerHTML = `
+            <button onclick="goBack()" style="position:fixed;top:22px;left:22px;padding:9px 18px;background:rgba(255,255,255,0.22);backdrop-filter:blur(10px);border:none;border-radius:30px;color:#fff;font-size:14px;cursor:pointer;z-index:9999;">← 返回星海</button>
+        `;
+        galaxyView.style.display = 'block';
+        g.items.forEach((it, i, arr) => {
+            let s = document.createElement('div');
+            s.className = 'star';
+            let style = getStarStyle(it.content.length);
+            s.style.background = style.color;
+            if (i === arr.length - 1) s.classList.add('last-purple');
+            s.style.left = it.x + '%';
+            s.style.top = it.y + '%';
+            let size = (Math.random() * 2.2 + 1).toFixed(1) * style.size;
+            s.style.width = size + 'px';
+            s.style.height = size + 'px';
+
+            // 查看必须验证
+            s.onclick = async () => {
+                let ok = await checkVerify();
+                if(!ok) return;
+                modalDate.textContent = it.date;
+                modalContent.textContent = it.content;
+                modal.style.display = 'block';
+            };
+            galaxyView.appendChild(s);
+        });
+    }
+
+    // 加载云端
+    async function loadFromCloud() {
+        try {
+            let res = await fetch(API_URL, { headers: { "X-Master-Key": API_KEY } });
+            let data = await res.json();
+            groups = data.record || [{items:[], x:50, y:50}];
+            renderMain();
+        } catch (e) {
+            groups = [{items:[], x:50, y:50}];
+            renderMain();
+        }
+    }
+
+    // 保存云端
+    async function saveToCloud() {
+        try {
+            await fetch(API_URL, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Master-Key": API_KEY
+                },
+                body: JSON.stringify(groups)
+            });
+        } catch (e) {}
+    }
+
     // 发送
     async function add() {
-        if (!isVerified) {
-            let ok = await checkVerify();
-            if (!ok) return;
-        }
-
+        let ok = await checkVerify();
+        if (!ok) return;
         let txt = input.value.trim();
         if (!txt) { toast("请输入想说的话"); return; }
         let date = new Date().toLocaleString('zh-CN', {
@@ -463,10 +451,8 @@
         const tx = Math.random()*90+5;
         const ty = Math.random()*80+10;
         let item = { content:txt, date, x:tx, y:ty };
-
         if (groups.length === 0) groups.push({items:[], x:50, y:50});
         let last = groups[groups.length - 1];
-
         if (last.items.length < GROUP_SIZE) {
             flyToTarget(tx, ty);
             last.items.push(item);
@@ -474,7 +460,6 @@
             const gx = Math.random()*85+7;
             const gy = Math.random()*75+12;
             flyToTarget(gx, gy);
-
             groups.push({
                 items: [item],
                 x: gx,
@@ -482,10 +467,9 @@
                 isNew: true
             });
         }
-
-        localStorage.setItem('groups', JSON.stringify(groups));
+        await saveToCloud();
         renderMain();
-        toast("✨ 每一次想念即是一颗星星");
+        toast("✨ 想念已存入星海");
         input.value = '';
     }
 
@@ -493,24 +477,19 @@
         let inp = document.createElement('input');
         inp.type = 'file';
         inp.accept = 'image/*';
-        inp.onchange = () => {
-            toast("📷 图片功能已启用");
-        };
+        inp.onchange = () => { toast("📷 图片功能已启用"); };
         inp.click();
     };
-
     sendBtn.addEventListener('click', add);
     input.addEventListener('keydown', function(e){
         if(e.key === 'Enter') add();
     });
-
     window.onclick = e => {
         if(e.target === modal) modal.style.display = 'none';
         if(e.target === verifyModal) verifyModal.style.display = 'none';
     };
-
     window.onload = function(){
-        renderMain();
+        loadFromCloud();
         input.focus();
     };
 </script>
