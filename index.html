@@ -149,6 +149,13 @@
             pointer-events: auto !important;
             text-align: center;
         }
+        /* 保留输入框原有样式，仅增加容器消除拼接感 */
+        .input-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        /* 输入框保持原始样式不变 */
         .input-box {
             width: 100%;
             padding: 15px 22px;
@@ -159,28 +166,28 @@
             color: #fff;
             font-size: 15px;
             outline: none;
-            margin-bottom: 12px;
         }
-        /* 修复+按钮居中问题 - 核心修改 */
+        /* 纯+号按钮 - 无圆形背景，仅保留符号 */
         .plus-btn {
             position: absolute;
-            right: 18px;
-            top: 50%; /* 改为top:50% */
-            transform: translateY(-50%); /* 垂直居中 */
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
             width: 26px;
             height: 26px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
+            background: transparent; /* 透明背景 */
             color: #fff;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
             border: none;
-            /* 确保文字居中 */
             display: flex;
             align-items: center;
             justify-content: center;
-            line-height: 1; /* 重置行高 */
-            padding: 0; /* 重置内边距 */
+            line-height: 1;
+            padding: 0;
+            pointer-events: auto;
+            /* 消除点击高亮 */
+            -webkit-tap-highlight-color: transparent;
         }
         .send-btn {
             padding: 10px 28px;
@@ -257,8 +264,11 @@
     <div id="mainView"></div>
     <div id="galaxyView"></div>
     <div class="input-area">
-        <input type="text" class="input-box" id="input" placeholder="给想念一处寄存的星海。">
-        <button class="plus-btn" id="plusBtn">+</button>
+        <!-- 容器仅用于定位，不改变输入框样式 -->
+        <div class="input-container">
+            <input type="text" class="input-box" id="input" placeholder="给想念一处寄存的星海。">
+            <button class="plus-btn" id="plusBtn">+</button>
+        </div>
         <button class="send-btn" id="sendBtn">星海会替你记得</button>
     </div>
     <div class="modal" id="modal">
