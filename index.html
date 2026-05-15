@@ -14,33 +14,36 @@
             width: 100%;
             height: 100%;
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-            background: #000;
             color: #fff;
             overflow: hidden;
         }
-        /* 全局背景层（最底层，不会被盖住） */
+        /* 最底层背景，绝对不会被盖住 */
         .bg {
             position: fixed;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            z-index: -9999;
+            z-index: -99999;
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
         }
-        /* 电脑横版 */
-        @media (min-aspect-ratio: 1/1) {
+        /* 电脑横版背景（用仓库里的图片） */
+        @media (min-width: 768px) {
             .bg {
-                background-image: url(https://p.qqan.com/up/2021-4/16175167066933106.jpg);
+                background-image: url("./bg-landscape.jpg");
             }
         }
-        /* 手机竖版 */
-        @media (max-aspect-ratio: 1/1) {
+        /* 手机竖版背景（用仓库里的图片） */
+        @media (max-width: 767px) {
             .bg {
-                background-image: url(https://p.qqan.com/up/2021-4/16175167077238746.jpg);
+                background-image: url("./bg-portrait.jpg");
             }
+        }
+        /* 纯黑兜底，防止图片加载失败 */
+        body {
+            background: #000;
         }
         .comet {
             position: fixed;
@@ -221,7 +224,7 @@
     </style>
 </head>
 <body>
-    <!-- 关键：背景层 -->
+    <!-- 最底层背景层 -->
     <div class="bg"></div>
 
     <div id="mainView"></div>
