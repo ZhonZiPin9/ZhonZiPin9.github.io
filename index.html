@@ -1,291 +1,613 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>杳无音讯 | 我性空山</title>
-<style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body {
-        width:100%;
-        height:100%;
-        background: #000;
-        color:#fff;
-        font-family: "PingFang SC","Microsoft YaHei",sans-serif;
-        overflow: hidden;
-    }
-
-    /* 背景图（和你仓库文件名完全对应） */
-    .bg {
-        position: fixed;
-        left:0; top:0;
-        width:100%; height:100%;
-        background-size: cover;
-        background-position: center;
-        z-index: 0;
-    }
-    @media (min-width: 768px) {
-        .bg { background-image: url('./bg-landscape.jpg'); }
-    }
-    @media (max-width: 767px) {
-        .bg { background-image: url('./bg-portrait.jpg'); }
-    }
-
-    /* 所有界面元素层级高于背景 */
-    .star-counter,
-    .input-area,
-    .modal,
-    .verify-modal,
-    #mainView {
-        position: fixed;
-        z-index: 999;
-    }
-
-    .star-counter {
-        top:20px; right:20px;
-        padding:8px 16px;
-        background:rgba(255,255,255,0.1);
-        border-radius:30px;
-        animation:twinkle 3s infinite;
-        pointer-events: auto;
-        cursor: pointer;
-    }
-    @keyframes twinkle {
-        0%,100%{opacity:0.7;}
-        50%{opacity:1;}
-    }
-
-    .input-area {
-        bottom:10%;
-        left:50%;
-        transform:translateX(-50%);
-        width:90%;
-        max-width:500px;
-        text-align:center;
-    }
-    .input-box {
-        width:100%;
-        padding:14px 20px;
-        border-radius:30px;
-        background:rgba(255,255,255,0.1);
-        color:#fff;
-        border:none;
-        font-size:15px;
-        margin-bottom:10px;
-    }
-    .send-btn {
-        padding:10px 25px;
-        border-radius:25px;
-        background:rgba(255,255,255,0.2);
-        color:#fff;
-        border:none;
-        font-size:14px;
-        cursor: pointer;
-    }
-
-    .modal {
-        top:50%; left:50%;
-        transform:translate(-50%,-50%);
-        background:rgba(0,0,0,0.9);
-        padding:30px;
-        border-radius:20px;
-        display:none;
-        color:#fff;
-    }
-    .verify-modal {
-        top:0; left:0;
-        width:100%; height:100%;
-        background:rgba(0,0,0,0.9);
-        display:none;
-        align-items:center;
-        justify-content:center;
-    }
-    .verify-input {
-        padding:12px 20px;
-        border-radius:30px;
-        background:rgba(255,255,255,0.1);
-        color:#fff;
-        border:none;
-        width:220px;
-        text-align:center;
-    }
-
-    .star {
-        position: absolute;
-        background: #fff;
-        border-radius: 50%;
-        animation: twinkleStar 2s infinite;
-        pointer-events: auto;
-        cursor: pointer;
-    }
-    @keyframes twinkleStar {
-        0%,100% { opacity: 0.3; }
-        50% { opacity: 1; }
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>杳无音讯 | 我性空山</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html,body {
+            width: 100%;
+            height: 100%;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            color: #fff;
+            overflow: hidden;
+        }
+        .bg {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -99999;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        @media (min-width: 768px) {
+            .bg {
+                background-image: url("./bg-landscape.jpg");
+            }
+        }
+        @media (max-width: 767px) {
+            .bg {
+                background-image: url("./bg-portrait.jpg");
+            }
+        }
+        body {
+            background: #000;
+        }
+        .star-counter {
+            position: fixed;
+            top: 22px;
+            right: 22px;
+            padding: 9px 18px;
+            background: rgba(255,255,255,0.13);
+            backdrop-filter: blur(12px);
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 9999;
+            cursor: pointer;
+            animation: counterTwinkle 3s ease-in-out infinite;
+        }
+        @keyframes counterTwinkle {
+            0%,100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        .comet {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: #a855f7;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #a855f7, 0 0 14px #a855f7;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+        }
+        .comet::after {
+            content: "";
+            position: absolute;
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(to right, rgba(168,85,247,0.5), transparent);
+            right: 0;
+            top: 0;
+        }
+        #mainView, #galaxyView {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+        #galaxyView {
+            display: none;
+            z-index: 10;
+        }
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: auto;
+            cursor: pointer;
+            animation: twinkle ease-in-out infinite;
+        }
+        @keyframes twinkle {
+            0%,100% { opacity: var(--o1); }
+            50% { opacity: var(--o2); }
+        }
+        .star.last-purple {
+            background: #a855f7 !important;
+            box-shadow: 0 0 20px #a855f7, 0 0 40px rgba(168,85,247,1) !important;
+            transform: scale(1.8);
+            z-index: 6;
+        }
+        .galaxy {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: auto;
+            cursor: pointer;
+            animation: galaxyRotate 22s linear infinite;
+            z-index: 2;
+            filter: blur(1.2px);
+        }
+        @keyframes galaxyRotate {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.08); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        .galaxy.new-burst {
+            animation: galaxyBurst 1.2s ease-out;
+        }
+        @keyframes galaxyBurst {
+            0% { transform: scale(0.4); opacity: 0; }
+            60% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .flying-star {
+            position: fixed;
+            z-index: 99999;
+            pointer-events: none;
+            transition: all 2.4s ease-out;
+            width: 16px;
+            height: 16px;
+            background: #a855f7;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            box-shadow: 0 0 20px #a855f7, 0 0 40px rgba(168,85,247,1);
+        }
+        .input-area {
+            position: fixed;
+            bottom: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 560px;
+            z-index: 9999;
+            pointer-events: auto !important;
+            text-align: center;
+        }
+        .input-box {
+            width: 100%;
+            padding: 15px 22px;
+            border: none;
+            border-radius: 35px;
+            background: rgba(255,255,255,0.13);
+            backdrop-filter: blur(12px);
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            margin-bottom: 12px;
+        }
+        .plus-btn {
+            position: absolute;
+            right: 18px;
+            top: 10px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+        }
+        .send-btn {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .toast {
+            position: fixed;
+            top: 22%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 22px;
+            z-index: 9999999;
+            font-size: 15px;
+            color: #fff;
+            text-align: center;
+        }
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            background: rgba(0,0,0,0.9);
+            padding: 35px;
+            border-radius: 20px;
+            z-index: 9999;
+            display: none;
+            min-width: 280px;
+            max-width: 90%;
+            color: #fff;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin: 10px 0;
+            pointer-events: auto;
+            cursor: default;
+        }
+        .verify-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .verify-input {
+            padding: 14px 24px;
+            border-radius: 30px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            width: 240px;
+            text-align: center;
+        }
+    </style>
 </head>
-
 <body>
-<!-- 背景图 -->
-<div class="bg"></div>
+    <div class="bg"></div>
+    <div class="star-counter" id="starCounter">✨0</div>
+    <div id="mainView"></div>
+    <div id="galaxyView"></div>
+    <div class="input-area">
+        <input type="text" class="input-box" id="input" placeholder="给想念一处寄存的星海。">
+        <button class="plus-btn" id="plusBtn">+</button>
+        <button class="send-btn" id="sendBtn">星海会替你记得</button>
+    </div>
+    <div class="modal" id="modal">
+        <div id="modalDate" style="font-size:12px;color:#aaa;margin-bottom:10px"></div>
+        <div id="modalContent"></div>
+    </div>
+    <div class="verify-modal" id="verifyModal">
+        <input class="verify-input" id="verifyInput" placeholder="你的名字">
+    </div>
 
-<!-- 背景音乐（和你仓库文件名完全对应） -->
-<audio id="bgm" src="./bgm.mp3" loop preload="auto" volume="0.4">
-
-<!-- 想念值计数器 -->
-<div class="star-counter" id="starCounter">✨0</div>
-
-<!-- 星空容器 -->
-<div id="mainView"></div>
-
-<!-- 输入框区域 -->
-<div class="input-area">
-    <input class="input-box" id="input" placeholder="给想念一处寄存的星海。">
-    <button class="send-btn" id="sendBtn">星海会替你记得</button>
-</div>
-
-<!-- 查看星星的弹窗 -->
-<div class="modal" id="modal">
-    <div id="modalDate" style="font-size:12px;color:#aaa;margin-bottom:10px;"></div>
-    <div id="modalContent"></div>
-</div>
-
-<!-- 口令验证弹窗 -->
-<div class="verify-modal" id="verifyModal">
-    <input class="verify-input" id="verifyInput" placeholder="你的名字">
-</div>
+<!-- 背景音乐 -->
+<audio id="bgm" loop preload="auto" src="bgm.mp3">
 
 <script>
-    // 1. 音乐控制：点击计数器暂停/播放，无提示
+    const GROUP_SIZE = 365;
+    const main = document.getElementById('mainView');
+    const galaxyView = document.getElementById('galaxyView');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+    const plusBtn = document.getElementById('plusBtn');
+    const modal = document.getElementById('modal');
+    const modalDate = document.getElementById('modalDate');
+    const modalContent = document.getElementById('modalContent');
+    const verifyModal = document.getElementById('verifyModal');
+    const verifyInput = document.getElementById('verifyInput');
+    const starCounter = document.getElementById('starCounter');
     const bgm = document.getElementById('bgm');
-    document.getElementById('starCounter').onclick = () => {
-        bgm.paused ? bgm.play() : bgm.pause();
-    };
-
-    // 2. 解决手机/电脑自动播放限制：第一次交互时播放音乐
-    function tryPlayBgm() {
-        if (bgm.paused) bgm.play().catch(() => {});
-    }
-    document.body.addEventListener('click', tryPlayBgm, { once: true });
-    document.body.addEventListener('touchstart', tryPlayBgm, { once: true, passive: true });
-
-    // 3. 云端配置（和你之前的配置保持一致）
+    let isVerified = false;
+    let selectedImage = '';
     const API_URL = "https://api.jsonbin.io/v3/b/6a06d65bc0954111d8280264";
     const API_KEY = "$2a$10$qB80mS9R8wjPkeiFI4l5SujXGYJyzUKpYOfH9kDM1FPBf8L9EnJVy";
     let groups = [];
-    let isVerified = false;
 
-    // 4. 更新想念值计数
+    // 自动播放音乐（兼容手机/电脑）
+    function autoPlayMusic() {
+        const play = () => {
+            bgm.play().catch(err => {});
+            document.removeEventListener('click', play);
+            document.removeEventListener('touchstart', play);
+        };
+        document.addEventListener('click', play);
+        document.addEventListener('touchstart', play);
+    }
+
+    // 右上角点击切换播放/暂停
+    starCounter.onclick = () => {
+        if (bgm.paused) {
+            bgm.play();
+        } else {
+            bgm.pause();
+        }
+    };
+
     function updateStarCount() {
         let total = 0;
         groups.forEach(g => total += g.items.length);
-        document.getElementById('starCounter').textContent = `✨${total}`;
+        let current = parseInt(starCounter.textContent.match(/\d+/)[0]) || 0;
+        let step = Math.ceil((total - current) / 20);
+        let timer = setInterval(() => {
+            current += step;
+            if (current >= total) {
+                current = total;
+                clearInterval(timer);
+            }
+            starCounter.textContent = `✨${current}`;
+        }, 30);
     }
 
-    // 5. 加载云端数据
+    function createComet() {
+        let c = document.createElement('div');
+        c.className = 'comet';
+        let startX = window.innerWidth + 150;
+        let startY = Math.random() * window.innerHeight * 0.6;
+        c.style.left = startX + 'px';
+        c.style.top = startY + 'px';
+        document.body.appendChild(c);
+        setTimeout(() => {
+            c.style.transition = 'all 3.2s linear';
+            c.style.opacity = '1';
+            c.style.left = '-200px';
+            c.style.top = (startY + 150) + 'px';
+        },20);
+        setTimeout(()=>c.remove(), 4000);
+    }
+    setInterval(createComet, 4500);
+
+    window.goBack = function() {
+        galaxyView.style.display = 'none';
+    }
+
+    function toast(msg) {
+        let t = document.createElement('div');
+        t.className = 'toast';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(()=>t.remove(), 2000);
+    }
+
+    function flyToTarget(targetX, targetY) {
+        let star = document.createElement('div');
+        star.className = 'flying-star';
+        const rect = input.getBoundingClientRect();
+        const startX = rect.left + rect.width/2 - 8;
+        const startY = rect.top + rect.height/2 - 8;
+        star.style.left = startX + 'px';
+        star.style.top = startY + 'px';
+        document.body.appendChild(star);
+        setTimeout(() => {
+            star.style.left = targetX + '%';
+            star.style.top = targetY + '%';
+            star.style.opacity = 0;
+        }, 50);
+        setTimeout(() => star.remove(), 2600);
+    }
+
+    function getStarStyle(len) {
+        let baseSize = 1.0;
+        let r = 255, g = 255, b = 255;
+        if (len > 10) {
+            let level = Math.min((len - 10) / 15, 1);
+            baseSize = 1 + level * 0.4;
+            g = Math.floor(255 - 255 * level);
+            b = Math.floor(255 - 255 * level);
+        }
+        return { size: baseSize, color: `rgb(${r},${g},${b})` };
+    }
+
+    async function checkVerify() {
+        return new Promise(resolve => {
+            if (isVerified) return resolve(true);
+            verifyModal.style.display = "flex";
+            verifyInput.value = "";
+            verifyInput.focus();
+            verifyInput.onkeydown = function(e) {
+                if(e.key === 'Enter'){
+                    const val = verifyInput.value.trim();
+                    if(val === "陈"){
+                        isVerified = true;
+                        verifyModal.style.display = "none";
+                        toast("你 来了");
+                        resolve(true);
+                    } else {
+                        toast("你 不是她");
+                        resolve(false);
+                    }
+                }
+            }
+        })
+    }
+
+    function renderMain() {
+        main.innerHTML = '';
+        groups.forEach((g, idx) => {
+            if (g.items.length === GROUP_SIZE) {
+                let gal = document.createElement('div');
+                gal.className = 'galaxy';
+                if (g.isNew) { gal.classList.add('new-burst'); delete g.isNew; }
+                const size = 60 + Math.random() * 25;
+                const r = Math.floor(Math.random() * 120) + 80;
+                const g1 = Math.floor(Math.random() * 100) + 100;
+                gal.style.width = size + 'px';
+                gal.style.height = size + 'px';
+                gal.style.left = (g.x || 50) + '%';
+                gal.style.top = (g.y || 50) + '%';
+                gal.style.background = `
+                    radial-gradient(circle, rgba(${r},${g1},255,0.18) 0%, transparent 40%),
+                    radial-gradient(circle, rgba(${r-30},${g1-30},255,0.14) 0%, transparent 60%)
+                `;
+                gal.onclick = () => openGalaxy(idx);
+                main.appendChild(gal);
+            }
+        });
+        if (groups.length === 0) return;
+        const last = groups[groups.length - 1];
+        if (last.items.length < GROUP_SIZE) {
+            last.items.forEach((it, i, arr) => {
+                let s = document.createElement('div');
+                s.className = 'star';
+                let style = getStarStyle(it.content?.length || 0);
+                s.style.background = style.color;
+                if (i === arr.length - 1) s.classList.add('last-purple');
+                s.style.left = it.x + '%';
+                s.style.top = it.y + '%';
+                let size = (Math.random() * 2.5 + 1).toFixed(1) * style.size;
+                s.style.width = size + 'px';
+                s.style.height = size + 'px';
+                s.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                s.style.setProperty('--o1', (Math.random() * 0.3 + 0.2).toFixed(2));
+                s.style.setProperty('--o2', (Math.random() * 0.5 + 0.6).toFixed(2));
+                s.onclick = async (e) => {
+                    e.stopPropagation();
+                    let ok = await checkVerify();
+                    if(!ok) return;
+                    modalDate.textContent = it.date;
+                    if(it.image){
+                        modalContent.innerHTML = `${it.content || ''}<br><img src="${it.image}">`;
+                    }else{
+                        modalContent.textContent = it.content || '';
+                    }
+                    modal.style.display = 'block';
+                };
+                main.appendChild(s);
+            });
+        }
+    }
+
+    function openGalaxy(idx) {
+        let g = groups[idx];
+        galaxyView.innerHTML = `
+            <button onclick="goBack()" style="position:fixed;top:22px;left:22px;padding:9px 18px;background:rgba(255,255,255,0.22);backdrop-filter:blur(10px);border:none;border-radius:30px;color:#fff;font-size:14px;cursor:pointer;z-index:9999;">← 返回星海</button>
+        `;
+        galaxyView.style.display = 'block';
+        g.items.forEach((it, i, arr) => {
+            let s = document.createElement('div');
+            s.className = 'star';
+            let style = getStarStyle(it.content?.length || 0);
+            s.style.background = style.color;
+            if (i === arr.length - 1) s.classList.add('last-purple');
+            s.style.left = it.x + '%';
+            s.style.top = it.y + '%';
+            let size = (Math.random() * 2.2 + 1).toFixed(1) * style.size;
+            s.style.width = size + 'px';
+            s.style.height = size + 'px';
+            s.onclick = async (e) => {
+                e.stopPropagation();
+                let ok = await checkVerify();
+                if(!ok) return;
+                modalDate.textContent = it.date;
+                if(it.image){
+                    modalContent.innerHTML = `${it.content || ''}<br><img src="${it.image}">`;
+                }else{
+                    modalContent.textContent = it.content || '';
+                }
+                modal.style.display = 'block';
+            };
+            galaxyView.appendChild(s);
+        });
+    }
+
     async function loadFromCloud() {
         try {
             let res = await fetch(API_URL, { headers: { "X-Master-Key": API_KEY } });
             let data = await res.json();
-            groups = data.record || [{ items: [] }];
-            renderStars();
+            groups = data.record || [{items:[], x:50, y:50}];
+            renderMain();
             updateStarCount();
         } catch (e) {
-            groups = [{ items: [] }];
+            groups = [{items:[], x:50, y:50}];
+            renderMain();
+            updateStarCount();
         }
     }
 
-    // 6. 渲染星星
-    function renderStars() {
-        const mainView = document.getElementById('mainView');
-        mainView.innerHTML = '';
-        if (groups.length === 0) return;
-        const lastGroup = groups[groups.length - 1];
-        lastGroup.items.forEach((item, index) => {
-            let star = document.createElement('div');
-            star.className = 'star';
-            star.style.left = item.x + '%';
-            star.style.top = item.y + '%';
-            star.style.width = (Math.random() * 2 + 1) + 'px';
-            star.style.height = star.style.width;
-
-            // 点击星星打开内容（需验证口令）
-            star.onclick = async (e) => {
-                e.stopPropagation();
-                if (!await checkVerify()) return;
-                document.getElementById('modalDate').textContent = item.date;
-                document.getElementById('modalContent').textContent = item.content;
-                document.getElementById('modal').style.display = 'block';
-            };
-            mainView.appendChild(star);
-        });
+    async function saveToCloud() {
+        try {
+            await fetch(API_URL, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Master-Key": API_KEY
+                },
+                body: JSON.stringify(groups)
+            });
+        } catch (e) {}
     }
 
-    // 7. 口令验证
-    async function checkVerify() {
-        return new Promise((resolve) => {
-            if (isVerified) return resolve(true);
-            document.getElementById('verifyModal').style.display = 'flex';
-            document.getElementById('verifyInput').onkeydown = (e) => {
-                if (e.key === 'Enter') {
-                    if (document.getElementById('verifyInput').value.trim() === '陈') {
-                        isVerified = true;
-                        document.getElementById('verifyModal').style.display = 'none';
-                        resolve(true);
-                    } else {
-                        resolve(false);
-                    }
-                }
+    plusBtn.onclick = () => {
+        let inp = document.createElement('input');
+        inp.type = 'file';
+        inp.accept = 'image/*';
+        inp.onchange = (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                selectedImage = ev.target.result;
+                input.value = "[图片] " + input.value;
+                toast("图片即将发射星海");
             };
-        });
-    }
-
-    // 8. 发送新内容
-    document.getElementById('sendBtn').onclick = async () => {
-        if (!await checkVerify()) return;
-        let txt = document.getElementById('input').value.trim();
-        if (!txt) return;
-
-        let item = {
-            content: txt,
-            date: new Date().toLocaleString('zh-CN', {
-                year: 'numeric', month: 'long', day: 'numeric',
-                hour: '2-digit', minute: '2-digit'
-            }),
-            x: Math.random() * 90 + 5,
-            y: Math.random() * 60 + 10
+            reader.readAsDataURL(file);
         };
-
-        if (groups.length === 0) groups.push({ items: [] });
-        groups[groups.length - 1].items.push(item);
-
-        // 保存到云端
-        await fetch(API_URL, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                "X-Master-Key": API_KEY
-            },
-            body: JSON.stringify(groups)
-        });
-
-        renderStars();
-        updateStarCount();
-        document.getElementById('input').value = '';
+        inp.click();
     };
 
-    // 9. 点击空白处关闭弹窗
-    window.addEventListener('click', (e) => {
-        if (e.target === document.getElementById('modal')) {
-            document.getElementById('modal').style.display = 'none';
+    async function add() {
+        let ok = await checkVerify();
+        if (!ok) return;
+        let txt = input.value.trim().replace("[图片] ","");
+        if (!txt && !selectedImage) { toast("你 有想对星星说的话吗"); return; }
+        
+        let date = new Date().toLocaleString('zh-CN', {
+            year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'
+        });
+        const tx = Math.random()*90+5;
+        const ty = Math.random()*65+10;
+        
+        let item = { 
+            content: txt, 
+            date: date, 
+            x: tx, 
+            y: ty,
+            image: selectedImage || '' 
+        };
+        selectedImage = '';
+        if (groups.length === 0) groups.push({items:[], x:50, y:50});
+        let last = groups[groups.length - 1];
+        if (last.items.length < GROUP_SIZE) {
+            flyToTarget(tx, ty);
+            last.items.push(item);
+        } else {
+            const gx = Math.random()*85+7;
+            const gy = Math.random()*60+10;
+            flyToTarget(gx, gy);
+            groups.push({
+                items: [item],
+                x: gx,
+                y: gy,
+                isNew: true
+            });
         }
-        if (e.target === document.getElementById('verifyModal')) {
-            document.getElementById('verifyModal').style.display = 'none';
-        }
+        await saveToCloud();
+        renderMain();
+        updateStarCount();
+        toast("✨ 想念已存入星海");
+        input.value = '';
+    }
+
+    sendBtn.addEventListener('click', add);
+    input.addEventListener('keydown', function(e){
+        if(e.key === 'Enter') add();
     });
 
-    // 启动页面
-    window.onload = loadFromCloud;
+    window.addEventListener('click', (e) => {
+        if(e.target === window || e.target === document.body || e.target === main || e.target === galaxyView) {
+            modal.style.display = 'none';
+            verifyModal.style.display = 'none';
+        }
+    });
+    window.addEventListener('touchstart', (e) => {
+        if(e.target === window || e.target === document.body || e.target === main || e.target === galaxyView) {
+            modal.style.display = 'none';
+            verifyModal.style.display = 'none';
+        }
+    }, { passive: true });
+
+    modal.addEventListener('click', (e) => {
+        if(e.target === modal) modal.style.display = 'none';
+    });
+    verifyModal.addEventListener('click', (e) => {
+        if(e.target === verifyModal) verifyModal.style.display = 'none';
+    });
+
+    window.onload = function(){
+        loadFromCloud();
+        autoPlayMusic();
+        input.focus();
+    };
 </script>
 </body>
 </html>
