@@ -429,7 +429,8 @@
                 s.style.setProperty('--o2', (Math.random() * 0.5 + 0.6).toFixed(2));
 
                 // 查看必须验证
-                s.onclick = async () => {
+                s.onclick = async (e) => {
+                    e.stopPropagation(); // 阻止事件冒泡
                     let ok = await checkVerify();
                     if(!ok) return;
                     modalDate.textContent = it.date;
@@ -460,7 +461,8 @@
             s.style.height = size + 'px';
 
             // 查看必须验证
-            s.onclick = async () => {
+            s.onclick = async (e) => {
+                e.stopPropagation(); // 阻止事件冒泡
                 let ok = await checkVerify();
                 if(!ok) return;
                 modalDate.textContent = it.date;
@@ -549,23 +551,35 @@
         if(e.key === 'Enter') add();
     });
 
-    // ✅ 修复手机端点击空白处无法关闭弹窗的问题
-    // 同时支持点击事件和触摸事件
-    function closeModalOnClick(e) {
-        if(e.target === modal) modal.style.display = 'none';
-        if(e.target === verifyModal) verifyModal.style.display = 'none';
-    }
-
-    // 同时监听点击和触摸事件
-    window.addEventListener('click', closeModalOnClick);
-    window.addEventListener('touchstart', closeModalOnClick);
-
-    // 给弹窗本身也添加点击关闭事件（双重保险）
-    modal.addEventListener('click', function(e) {
-        if(e.target === this) this.style.display = 'none';
+    // ✅ 完美平衡的关闭逻辑
+    // 1. 点击页面任何空白处关闭
+    window.addEventListener('click', (e) => {
+        if(e.target === window || e.target === document.body || e.target === main || e.target === galaxyView) {
+            modal.style.display = 'none';
+            verifyModal.style.display = 'none';
+        }
     });
-    verifyModal.addEventListener('click', function(e) {
-        if(e.target === this) this.style.display = 'none';
+
+    // 2. 手机端触摸事件同样支持
+    window.addEventListener('touchstart', (e) => {
+        if(e.target === window || e.target === document.body || e.target === main || e.target === galaxyView) {
+            modal.style.display = 'none';
+            verifyModal.style.display = 'none';
+        }
+    }, { passive: true });
+
+    // 3. 点击内容框的背景（不是内容本身）关闭
+    modal.addEventListener('click', (e) => {
+        if(e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // 4. 口令弹窗点击背景关闭，点击输入框不关闭
+    verifyModal.addEventListener('click', (e) => {
+        if(e.target === verifyModal) {
+            verifyModal.style.display = 'none';
+        }
     });
 
     window.onload = function(){
